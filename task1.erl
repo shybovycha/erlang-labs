@@ -41,7 +41,7 @@ reverse_create(1) -> [1];
 reverse_create(N) -> [ N | reverse_create(N - 1) ].
 
 % Задача 3-5-1: фільтрування списку
-filter([ H | Tail ], N) ->
+filter_num([ H | Tail ], N) ->
     if
         H =< N -> [ H ] ++ filter(Tail, N);
         true -> []
@@ -64,3 +64,42 @@ flatten([ H | Tail ]) ->
         is_list(H) -> flatten(H) ++ flatten(Tail);
         true -> [ H ] ++ flatten(Tail)
     end.
+
+% Підрахувати середнє значення у списку
+avg(H) ->
+	avg(H, 0, 0).
+avg([], Sum, Count) ->
+	Sum / Count;
+avg([ H | Tail ], Sum, Count) ->
+	avg(Tail, Sum + H, Count + 1).
+
+% Echo server
+echo_start() ->
+	spawn(task1, echo_service, []).
+
+echo_service() ->
+	receive
+		{ Sender, Message } ->
+			Sender ! Message,
+			echo_service();
+
+		stop ->
+			stop
+	end.
+
+echo(Pid, Message) ->
+	Pid ! { self(), Message }.
+
+echo_stop(Pid) ->
+	Pid ! stop.
+
+% alternative filter
+filter(_, []) ->
+	[];
+filter(F, [ H | Tail ]) ->
+	case F(H) of
+		true -> [ H ] ++ filter(F, Tail);
+		false -> filter(F, Tail)
+	end.
+
+% filter(fun(X) -> (X rem 2 == 0) end, [1, 2, 3, 4, 5]).
